@@ -1,0 +1,139 @@
+<!--  http://canvasjs.com/docs/charts/basics-of-creating-html5-chart/updating-chart-options/  -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title> Renewable Energy Simulator </title>
+    <script type="text/javascript" src="phaser.min.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+
+        <script type="text/javascript" src="canvasjs.min.js"></script>
+    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+    <script type="text/javascript">
+        var velo =10;
+        var area= 4;
+        var dens=0.3;
+        var power_gen=0;
+        function get_velocity(newValue)
+        {
+            velo=newValue;
+            document.getElementById("velocity").innerHTML=newValue;
+            document.getElementById("power").innerHTML=energy_gen_pre();
+        }
+        function get_density(newValue)
+        {
+            dens=newValue;
+            document.getElementById("density").innerHTML=newValue;
+            document.getElementById("power").innerHTML=energy_gen_pre();
+        }
+        function get_area(newValue)
+        {
+            area=newValue;
+            document.getElementById("area").innerHTML=newValue;
+            document.getElementById("power").innerHTML=energy_gen_pre();
+        }
+        function energy_gen(density,swept_area,velocity,gen_eff,mech_eff,coff_perfo)
+        {
+
+
+            power_gen = 0.5 * swept_area * density * gen_eff * mech_eff * coff_perfo * Math.pow( velocity , 3);
+            power_gen = Math.round(power_gen * 100) / 100;
+            //document.getElementById("power_pre").innerHTML=power_gen;
+            return power_gen;
+        }
+        function energy_gen_pre() {
+
+
+            power_gen = energy_gen(window.dens,window.area,window.velo,0.8,0.95,0.5);
+            return power_gen;
+        }
+
+        function get_power()
+        {
+            return power_gen;
+        }
+
+
+
+        window.onload = function () {
+            var chart = new CanvasJS.Chart("chartContainer", {
+                title: {
+                    text: "Adding & Updating dataPoints"
+                },
+                data: [
+                    {
+                        type: "spline",
+                        dataPoints: [
+                            { y: get_power() }
+                        ]
+                    }
+                ]
+            });
+            chart.render();
+
+            $("#speed").change(function () {
+
+                var length = chart.options.data[0].dataPoints.length;
+                chart.options.title.text = "Power Generation Based on Condition Provided";
+                chart.options.data[0].dataPoints.push({ y: get_power()});
+                chart.render();
+
+            });
+
+            $("#density1").change(function () {
+
+                var length = chart.options.data[0].dataPoints.length;
+                chart.options.title.text = "Power Generation Based on Condition Provided";
+                chart.options.data[0].dataPoints.push({ y: get_power()});
+                chart.render();
+
+            });
+            $("#area1").change(function () {
+
+                var length = chart.options.data[0].dataPoints.length;
+                chart.options.title.text = "Power Generation Based on Condition Provided";
+                chart.options.data[0].dataPoints.push({ y: get_power()});
+                chart.render();
+
+            });
+
+            $("#updateDataPoint").click(function () {
+
+                var length = chart.options.data[0].dataPoints.length;
+                chart.options.title.text = "Last DataPoint Updated";
+                chart.options.data[0].dataPoints[length-1].y = 15 - Math.random() * 10;
+                chart.render();
+
+            });
+        }
+
+
+    </script>
+
+
+</head>
+<body>
+<p> Wind Energy Simulator </p>
+<div id="gameDiv"> </div>
+Select Velocity
+<input type="range" name="speed" id = "speed" min="0" max="50" value="10" step="1" onchange="get_velocity(this.value)" />
+<p></p>Select Density<input type="range" name="density" id="density1" min="0.1" max="1.5" value="0.3" step="0.1" onchange="get_density(this.value)" />
+<p></p>
+Select Area
+<input type="range" name="area" id="area1" min="0" max="200" value="4" step="1" onchange="get_area(this.value)" /> <p></p>
+Velocity of wind: <span id="velocity">10</span> <b>  </b>
+Density of Air  : <span id="density">0.3</span> <b>   </b>
+Swept Area      : <span id="area">4</span>    <p>   </p>
+Wind Power Generation (W): <span id="power"></span>  <p></p>
+
+<div id="chartContainer" style="height: 300px; width:100%;">
+</div>
+<!--
+<p>Intermediate data Wind Energy Pre_processed : <span id="power_pre"></span>  </p>
+Velocity_data: <span id="pre_vel"></span> <b>  </b>
+Density_data: <span id="pre_den"></span> <b>   </b>
+Swept Area_data : <span id="pre_area"></span>    <p>   </p>
+Wind Energy Pre_processed : <span id="power_pre"></span>  <p></p>
+ -->
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title> Renewable Energy Simulator </title>
+    <script type="text/javascript" src="javascript/phaser.min.js"></script>
+    <script type="text/javascript" src="js/js/main.js"></script>
+    <script type="text/javascript" src="javascript/canvasjs.min.js"></script>
+    <script type="text/javascript" src="javascript/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="js/re_fuctions.js"></script>
+    <script type="text/javascript">
+
+        var gen_eff = 0.8;
+        var mech_eff = 0.95;
+        var coff_perfo = 0.5;
+
+        function energy_gen(density,swept_area,velocity,gen_eff,mech_eff,coff_perfo)
+        {
+            dens = density;
+            velo  = velocity;
+            area =swept_area;
+            window.gen_eff = gen_eff;
+            window.mech_eff = mech_eff;
+            window.coff_perfo  = coff_perfo;
+            power_gen =  energy_gen_pre();
+            return power_gen;
+        }
+        
+        function energy_gen_pre() {
+            //window.console.log(" type of cut in velocity"+typeof parseFloat(window.cut_out_velo));
+            velo  = parseFloat(window.velo.toFixed(2));
+            // cut_in_velo = cut_in_velo * 1;
+            window.console.log("Velo = " + velo  + "Cut in velocity " + cut_in_velo  + "Cut out velocity" +cut_out_velo);
+            if (velo < parseFloat(window.cut_out_velo) && velo >= parseFloat(window.cut_in_velo)) {
+            power_gen = 0.5 * window.area * window.dens * window.gen_eff * window.mech_eff * window.coff_perfo * Math.pow(velo, 3);
+            power_gen = parseFloat(parseFloat(power_gen/1000).toFixed(2));
+            //document.getElementById("power_pre").innerHTML=power_gen
+                window.console.log("Speed in permissible range " + power_gen);
+            }
+            else{
+                power_gen = 0;
+                window.console.log("Speed is in Out of Range " + power_gen);
+            }
+            return power_gen;
+        }
+
+        function get_power() {
+
+            return power_gen;
+        }
+
+        window.onload = function () {
+            var x_c=0;
+            var dps = []; //datapoints
+            var chart = new CanvasJS.Chart("chartContainer", {
+                title: {
+                    text: "Power Generation"
+                },
+                axisY: {
+                    title: "Power  (KWp)"
+                },
+                data: [  { type: "spline",dataPoints: dps } ],
+                toolTip:{
+                        content: " Swept Area(m2) : {m}, Air Density :{n}, Air Velocity(m/Sec) : {o} <br/> Power Generation (KWp) : {y} "
+                     }
+        });
+            var xVal = 0; var yVal = 100; var dataLength =100;
+            var a; var b; var c;
+
+            $("#speed").change(function () {
+
+                x_c = x_c+1;
+                a = window.area;
+                b = window.dens;
+                c=  window.velo;
+                var length = chart.options.data[0].dataPoints.length;
+                if(length > dataLength) dps.shift();
+                chart.options.title.text = "Power Generation ";
+                dps.push({ x:x_c, y: get_power(), m: a, n :b, o : c});
+                chart.render();
+            });
+
+            $("#density1").change(function () {
+
+                a = window.area;
+                b = window.dens;
+                c=  window.velo;
+                var length = chart.options.data[0].dataPoints.length;
+                x_c = x_c+1;
+                if(length > dataLength) dps.shift();
+                chart.options.title.text = "Power Generation Based on Condition Provided";
+                dps.push({
+                   x:x_c,
+                    y: get_power(), m: a, n :b, o : c});
+                chart.render();
+            });
+            $("#area1").change(function () {
+                x_c=x_c+1;
+                a = window.area;
+                b = window.dens;
+                c=  window.velo;
+                var length = chart.options.data[0].dataPoints.length;
+               if(length > dataLength) {dps.shift();
+                   window.console.log(dps);}
+                chart.options.title.text = "Power Generation Based on Condition Provided";
+                dps.push({x:x_c, y: get_power() , m: a, n :b, o : c});
+                 chart.render();
+            });
+
+          ;
+        }
+    </script>
+</head>
+<body>
+<p> Wind Energy Simulator </p>
+<!--<div id="gameDiv"> </div> -->
+Entry of Reference Data: <br/>
+Select Height (M) for Reference Data <input type="range" name="ref_height" id = "ref_height" min="0" max="100" value="10" step=".4" onchange="get_ref_height(this.value)" />
+Cut in Speed <input type="range" name="cut_in_speed" id = "cut_in" min="0" max="13" value="0" step="1" onchange="set_cut_in(this.value)" />
+Cut out Speed <input type="range" name="cut_out_speed" id = "cut_out" min=11 max="50" value="12" step="0.5" onchange="set_cut_out(this.value)" />
+Set Friction Co-efficient (α) :- <br>
+
+<select name ="friction_coff" id = "friction_coff" onchange= "update_fric_coff()">
+    <option value="" disabled="disabled" selected="selected">Select Area Type</option>
+    <option value=0.1 >Smooth hard ground, calm water</option>
+    <option value=0.15>Tall grass on ground</option>
+    <option value=0.20>High crops and hedges</option>
+    <option value=0.25>Wooded countryside, many trees</option>
+    <option value=0.3>Small town with trees</option>
+    <option value=0.4>Large city with tall buildings</option>
+</select>
+Turbine Height (To be Simulated in Meter) <input type="range" name="turb_height" id = "turb_height" min="0" max="100" value="10" step="1" onchange="get_turbine_height(this.value)" /> <br>
+Air Velocity <input type="range" name="speed" id = "speed" min="0" max="100" value="0" step="1" onchange="get_velocity(this.value)" />
+Air Density<input type="range" name="density" id="density1" min="0.1" max="1.5" value="1.2" step="0.1" onchange="get_density(this.value)" />
+Diameter of Wind Turbine Blade <input type="range" name="area" id="area1" min="0" max="140" value="4" step="1" onchange="get_area(this.value)" />
+
+
+Velocity of wind: <span id="velocity"></span> <b>  </b>
+Density of Air  : <span id="density">0.3</span> <b>   </b>
+Swept Area      : <span id="area">4</span>    <br/> Cut in Velocity      : <span id="c_in_velo"></span>  <br/>
+Cut out Velocity: <span id="c_out_velo"></span>  <p></p>
+Wind Power Generation (KW): <span id="power"></span>  <p></p>
+
+<div id="chartContainer" style="height: 300px; width:100%;">
+</div>
+<!--
+<p>Intermediate data Wind Energy Pre_processed : <span id="power_pre"></span>  </p>
+Velocity_data: <span id="pre_vel"></span> <b>  </b>
+Density_data: <span id="pre_den"></span> <b>   </b>
+Swept Area_data : <span id="pre_area"></span>    <p>   </p>
+Wind Energy Pre_processed : <span id="power_pre"></span>  <p></p>
+ -->
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
